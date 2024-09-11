@@ -1,0 +1,51 @@
+services:
+  be_yugi_shop:
+    image: node:20-alpine
+    command: sh -c "npm install && npm run start:dev"
+    ports:
+      - 8080:8080
+    working_dir: /usr/src/app
+    volumes:
+      - ./:/usr/src/app 
+    environment:
+       PORT: 8080
+       MYSQL_TYPE: "mysql"
+       MYSQL_HOST: "localhost"
+       MYSQL_PORT : 3306
+       MYSQL_USERNAME : "root"
+       MYSQL_PASSWORD : "291299"
+       MYSQL_NAME : "yugi_shop"
+       MYSQL_SYNCHRONIZE : false
+       MYSQL_MAX_CONNECTIONS : 100
+       MYSQL_SSL_ENABLED : false
+       MYSQL_REJECT_UNAUTHORIZED : false
+       MONGODB_TYPE : "mongodb"
+       MONGODB_HOST : "localhost"
+       MONGODB_PORT : "27017"
+       MONGODB_DB : "yugi_shop"
+    networks:
+      - yuginetwork
+  mysql: 
+    image: mysql:8.0
+    volumes: 
+      - db_mysql_data:/var/lib/mysql
+    ports:
+      - 3307:3306
+    environment:
+       MYSQL_ROOT_PASSWORD: 291299
+       MYSQL_DATABASE: yugi_shop
+  mongodb:
+    image: mongo:7.0.8
+    volumes:
+      - db_mongo_data:/var/lib/mongo
+    ports:
+      - 27017:27017
+    networks:
+      - yuginetwork
+    environment:
+       MONGODB_DB : yugi_shop
+volumes:
+  db_mysql_data:
+  db_mongo_data:
+networks:
+  yuginetwork:
