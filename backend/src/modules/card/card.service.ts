@@ -1,13 +1,12 @@
-import { AttributeCardService } from './../attribute-card/attributeCard.service';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
-import { FileService } from '../file/file.service';
-import { CreateCardRequest } from './model/createCardRequest.model';
-import { BaseService } from '../base/base.service';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Card } from 'src/database/entities/card.entity';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { BaseService } from '../base/base.service';
+import { FileService } from '../file/file.service';
+import { AttributeCardService } from './../attribute-card/attributeCard.service';
+import { CreateCardRequest } from './model/createCardRequest.model';
 
 import { TypeCardService } from '../type-card/typeCard.service';
 
@@ -23,16 +22,19 @@ export class ProductService extends BaseService<Card> {
     super(productRepository);
   }
 
-  async findAll(): Promise<any> {
-    const { data } = await firstValueFrom(this.httpService.get(`http://localhost:8081/data`));
-
+  async findAll() {
+    // const { data } = await firstValueFrom(this.httpService.get(`http://localhost:8081/data`));
+    const { data } = await this.findAll();
     return data;
   }
 
-  async findById(id): Promise<any> {
-    const { data } = await firstValueFrom(this.httpService.get(`http://localhost:8081/data?id=${id}`));
-
-    return data;
+  async getProduct(id) {
+    try {
+      const card = await this.findById(id);
+      return card;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async createCard(request: CreateCardRequest) {

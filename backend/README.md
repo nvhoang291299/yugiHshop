@@ -5,7 +5,7 @@
 ## Migration database
 
 ```generate
-$ npm run migration:generate --name=
+$ npm run migration:generate --name=<migration_name>
 ```
 
 ```run

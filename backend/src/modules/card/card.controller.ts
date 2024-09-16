@@ -10,12 +10,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from 'guards/authGuard.guard';
+import { AuthGuard } from 'src/guards/authGuards.guard';
+import { RoleGuard } from 'src/guards/roleGuards.guard';
 import { ProductService } from './card.service';
 import { CreateCardRequest } from './model/createCardRequest.model';
-import { Roles } from 'decorators/role.decorator';
+import { Roles } from 'src/decorators/role.decorator';
 import { Role } from 'src/types/role.enum';
-import { RoleGuard } from 'guards/roleGuard.guard';
 
 @Controller('card/')
 @UseGuards(AuthGuard, RoleGuard)
@@ -27,13 +27,19 @@ export class ProductController {
     return this.productService.findAll();
   }
 
-  @Get('/:id')
-  getProduct(@Param('id') id: any) {
-    return this.productService.findById(id);
+  @Get('detail')
+  @Roles([Role.SELLER])
+  async getProduct(@Param('id') id: any) {
+    try {
+      const res = await this.productService.getProduct(id);
+      return res;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Post('create')
-  @Roles(Role.BUYER)
+  // @Roles(Role.BUYER)
   @UseInterceptors(FileInterceptor('imageUrl'))
   async createCard(@Body() request: CreateCardRequest, @UploadedFile() imageUrl: Express.Multer.File) {
     try {
