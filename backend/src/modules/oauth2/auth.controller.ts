@@ -19,8 +19,7 @@ export class AuthController {
       const res = await this.authService.handleCallback(request);
       return res;
     } catch (error) {
-      console.log('error');
-      console.log(error);
+      console.log('error callback');
     }
   }
   // @Get('facebook/login')

@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from 'src/database/entities/role.entity';
 import { Repository } from 'typeorm';
 import { User } from '../../database/entities/user.entity';
 import { BaseService } from '../base/base.service';
-import { Role } from 'src/database/entities/role.entity';
 import { UserDto } from './dto/user.dto';
 
 @Injectable()
@@ -33,10 +33,14 @@ export class UserService extends BaseService<User> {
     return await this.save(newUser);
   }
 
-  // async getInfo(id: string) {
-  //   const user = await this.userRepository.findOneBy({id})
-  //   return user;
-  // }
+  async getProfile(id: number) {
+    const user = await this.findBy({ where: { id: id }, relations: ['roles'], loadEagerRelations: true });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const userDto = new UserDto(user);
+    return userDto;
+  }
 
   // async editInfo(id: string, updateUser: UpdateUser) {
   //   const user = await this.userRepository.findOneBy({id})

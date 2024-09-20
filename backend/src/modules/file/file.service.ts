@@ -19,7 +19,6 @@ export class FileService {
     uploadBytes(storageRef, imageUrl).then(() => {
       console.log('Uploaded a blob or file!');
     });
-    const db = admin.firestore();
-    console.log(db);
+    // const db = admin.firestore();
   }
 }
