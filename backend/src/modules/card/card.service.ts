@@ -41,6 +41,7 @@ export class ProductService extends BaseService<Card> {
     const attribute = await this.attributeCardService.getAttribute(request.attribute);
     const type = await this.typeCardService.getType(request.type);
     const newCard = new Card();
+    newCard.cardCode = request.cardCode;
     newCard.name = request.name;
     newCard.atk = request.atk;
     newCard.def = request.def;

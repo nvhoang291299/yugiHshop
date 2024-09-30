@@ -1,11 +1,15 @@
+import { IsNumber, IsString } from 'class-validator';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base/baseEntity.entity';
-import { IsNumber, IsString } from 'class-validator';
 import { AttributeCard } from './attribute-card.entity';
 import { TypeCard } from './type-card.entity';
 
 @Entity()
 export class Card extends BaseEntity {
+  @Column({ nullable: true })
+  @IsString()
+  cardCode: string;
+
   @Column()
   @IsString()
   name: string;
@@ -30,6 +34,10 @@ export class Card extends BaseEntity {
   @Column()
   @IsNumber()
   price: number;
+
+  @Column()
+  @IsNumber()
+  quantity: number;
 
   @Column()
   @IsNumber()

@@ -3,6 +3,10 @@ import { IsNumber, IsString } from 'class-validator';
 
 export class CreateCardRequest {
   @IsString()
+  @Optional()
+  cardCode?: string;
+
+  @IsString()
   name: string;
 
   @IsString()

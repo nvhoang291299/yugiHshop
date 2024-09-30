@@ -1,7 +1,7 @@
+import { IsOptional } from 'class-validator';
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../base/baseEntity.entity';
 import { Role } from './role.entity';
-import { IsOptional } from 'class-validator';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -31,9 +31,6 @@ export class User extends BaseEntity {
 
   //   @OneToMany(() => Transactions, (transactions) => transactions.user)
   //   transactions: Transactions[];
-
-  //   @OneToMany(() => Orders, (orders) => orders.user)
-  //   order: Orders[];
 
   @ManyToMany(() => Role, (role) => role.users, { cascade: true })
   @JoinTable()
