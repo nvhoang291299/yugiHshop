@@ -1,17 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
-import { ProductModule } from './modules/card/card.module';
-// import typeOrmConfig from './database/typeorm.config';
+import { CardModule } from './modules/card/card.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-// import {validate} from './config/configTypeOrm';
 import { CacheModule } from '@nestjs/cache-manager';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PassportModule } from '@nestjs/passport';
 import { dataSourceOption } from './config/configTypeOrm.config';
-import { AlbumModule } from './modules/album/album.module';
+import { CollectionModule } from './modules/collection/collection.module';
 import { FileModule } from './modules/file/file.module';
 import { AuthModule } from './modules/oauth2/auth.module';
+import { OrderModule } from './modules/order/order.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -27,12 +25,12 @@ import { UserModule } from './modules/user/user.module';
       `mongodb://${process.env.MONGODB_HOST}:${process.env.MONGODB_PORT}/${process.env.MONGODB_DB}`,
     ),
     CacheModule.register(),
-    PassportModule.register({ session: true }),
-    ProductModule,
+    CardModule,
     UserModule,
-    AlbumModule,
+    CollectionModule,
     AuthModule,
     FileModule,
+    OrderModule,
   ],
 })
 export class AppModule {}

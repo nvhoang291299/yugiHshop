@@ -3,35 +3,34 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Roles } from 'src/decorators/role.decorator';
 import { AuthGuard } from 'src/guards/authGuards.guard';
 import { RoleGuard } from 'src/guards/roleGuards.guard';
-import { ProductService } from './card.service';
-import { CreateCardRequest } from './model/createCardRequest.model';
-import { Roles } from 'src/decorators/role.decorator';
 import { Role } from 'src/types/role.enum';
+import { CardService } from './card.service';
+import { CreateCardRequest } from './model/createCardRequest.model';
 
-@Controller('card/')
+@Controller('card')
 @UseGuards(AuthGuard, RoleGuard)
-export class ProductController {
-  constructor(private productService: ProductService) {}
+export class CardController {
+  constructor(private cardService: CardService) {}
 
   @Get()
   getList() {
-    return this.productService.findAll();
+    return this.cardService.findAll({ order: { createdAt: 'DESC' } });
   }
 
   @Get('detail')
-  @Roles([Role.SELLER])
-  async getProduct(@Param('id') id: any) {
+  async getProduct(@Query('id') id: number) {
     try {
-      const res = await this.productService.getProduct(id);
+      const res = await this.cardService.getProduct(id);
       return res;
     } catch (error) {
       console.log(error);
@@ -39,12 +38,12 @@ export class ProductController {
   }
 
   @Post('create')
-  // @Roles(Role.BUYER)
+  @Roles([Role.ADMIN])
   @UseInterceptors(FileInterceptor('imageUrl'))
   async createCard(@Body() request: CreateCardRequest, @UploadedFile() imageUrl: Express.Multer.File) {
     try {
       console.log(imageUrl);
-      const res = this.productService.createCard(request);
+      const res = await this.cardService.createCard(request, imageUrl);
       return res;
     } catch (error) {
       console.log(error);

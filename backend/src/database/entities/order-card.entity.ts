@@ -1,7 +1,8 @@
-import { Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Order } from './order.entity';
 import { Card } from './card.entity';
 
+@Entity()
 export class OrderCard {
   @PrimaryGeneratedColumn()
   id: number;
@@ -12,9 +13,9 @@ export class OrderCard {
   @Column()
   price: number;
 
-  @ManyToOne(() => Order, (order) => order.cards)
+  @ManyToOne(() => Order, (order) => order.orderCards)
   order: Order;
 
-  @ManyToOne(() => Card, (card) => card.id)
+  @ManyToOne(() => Card, (card) => card.id, { eager: true })
   card: Card;
 }

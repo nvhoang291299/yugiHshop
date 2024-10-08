@@ -1,24 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import * as admin from 'firebase-admin';
-import { ServiceAccount } from 'firebase-admin';
-import { getStorage, ref, uploadBytes } from 'firebase/storage';
-import { adminsdk } from 'src/config/firebase.config';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class FileService {
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async uploadFile(imageUrl) {
-    const serviceAccount: ServiceAccount = require(JSON.stringify(adminsdk));
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      storageBucket: 'gs://yugiohshop-ca5fe.appspot.com',
-    });
-    const storage = getStorage();
-    const storageRef = ref(storage, 'card');
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    uploadBytes(storageRef, imageUrl).then(() => {
-      console.log('Uploaded a blob or file!');
-    });
-    // const db = admin.firestore();
+  bucketName = process.env.AWS_BUCKET_NAME;
+  s3 = new S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  });
+  async uploadFile(file) {
+    const { originalname } = file;
+    return await this.s3Upload(file.buffer, this.bucketName, originalname, file.mimetype);
+  }
+
+  async s3Upload(file, bucket, name, mimetype) {
+    try {
+      const s3Response = await this.s3.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: `card/${String(name)}`,
+          Body: file,
+          ACL: 'public-read',
+          ContentType: mimetype,
+          ContentDisposition: 'inline',
+        }),
+      );
+      return s3Response;
+    } catch (e) {
+      console.log(e);
+    }
   }
 }

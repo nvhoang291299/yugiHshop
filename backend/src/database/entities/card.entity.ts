@@ -43,9 +43,9 @@ export class Card extends BaseEntity {
   @IsNumber()
   ownerBy: number;
 
-  @ManyToOne(() => AttributeCard, (attributeCard) => attributeCard.cards)
+  @ManyToOne(() => AttributeCard, (attributeCard) => attributeCard.cards, { eager: true })
   attribute: AttributeCard;
 
-  @ManyToOne(() => TypeCard, (typeCard) => typeCard.cards)
+  @ManyToOne(() => TypeCard, (typeCard) => typeCard.cards, { eager: true })
   type: TypeCard;
 }

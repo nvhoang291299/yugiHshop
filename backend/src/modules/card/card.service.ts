@@ -1,20 +1,18 @@
-import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Card } from 'src/database/entities/card.entity';
 import { Repository } from 'typeorm';
 import { BaseService } from '../base/base.service';
 import { FileService } from '../file/file.service';
+import { TypeCardService } from '../type-card/typeCard.service';
 import { AttributeCardService } from './../attribute-card/attributeCard.service';
 import { CreateCardRequest } from './model/createCardRequest.model';
 
-import { TypeCardService } from '../type-card/typeCard.service';
-
 @Injectable()
-export class ProductService extends BaseService<Card> {
+export class CardService extends BaseService<Card> {
+  private readonly logger = new Logger(CardService.name);
   constructor(
     @InjectRepository(Card) private readonly productRepository: Repository<Card>,
-    private readonly httpService: HttpService,
     private readonly fileService: FileService,
     private readonly attributeCardService: AttributeCardService,
     private readonly typeCardService: TypeCardService,
@@ -22,22 +20,24 @@ export class ProductService extends BaseService<Card> {
     super(productRepository);
   }
 
-  async findAll() {
-    // const { data } = await firstValueFrom(this.httpService.get(`http://localhost:8081/data`));
-    const { data } = await this.findAll();
-    return data;
-  }
+  async getListProduct() {}
 
-  async getProduct(id) {
+  async getProduct(id: number) {
     try {
-      const card = await this.findById(id);
+      const card = await this.findBy({
+        where: { id: id },
+      });
       return card;
     } catch (error) {
-      console.log(error);
+      this.logger.error(`Card ${id} not exist.`);
+      throw new BadRequestException('Card not found.', error);
     }
   }
 
-  async createCard(request: CreateCardRequest) {
+  async createCard(request: CreateCardRequest, imageUrl: Express.Multer.File) {
+    const file = this.fileService.uploadFile(imageUrl);
+    console.log('file', file);
+
     const attribute = await this.attributeCardService.getAttribute(request.attribute);
     const type = await this.typeCardService.getType(request.type);
     const newCard = new Card();

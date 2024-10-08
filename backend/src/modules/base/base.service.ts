@@ -5,8 +5,8 @@ import { FindOneOptions, Repository } from 'typeorm';
 export abstract class BaseService<T> {
   constructor(private repository: Repository<T>) {}
 
-  async findAll(): Promise<T[]> {
-    return await this.repository.find();
+  async findAll(options: FindOneOptions<T>): Promise<T[]> {
+    return await this.repository.find(options);
   }
 
   async findById(id): Promise<T> {
