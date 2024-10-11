@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
 @Injectable()
 export abstract class BaseService<T> {
@@ -7,6 +7,10 @@ export abstract class BaseService<T> {
 
   async findAll(options: FindOneOptions<T>): Promise<T[]> {
     return await this.repository.find(options);
+  }
+
+  async findAllAndCount(options: FindManyOptions<T>): Promise<[T[], number]> {
+    return await this.repository.findAndCount(options);
   }
 
   async findById(id): Promise<T> {

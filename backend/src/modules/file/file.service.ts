@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FileService {
-  bucketName = process.env.AWS_BUCKET_NAME;
-  s3 = new S3Client({
+  private bucketName = process.env.AWS_BUCKET_NAME;
+  private s3 = new S3Client({
     region: process.env.AWS_REGION,
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -18,7 +18,7 @@ export class FileService {
 
   async s3Upload(file, bucket, name, mimetype) {
     try {
-      const s3Response = await this.s3.send(
+      await this.s3.send(
         new PutObjectCommand({
           Bucket: bucket,
           Key: `card/${String(name)}`,
@@ -28,7 +28,8 @@ export class FileService {
           ContentDisposition: 'inline',
         }),
       );
-      return s3Response;
+      const url = `https://yugishop.s3.amazonaws.com/card/${name}`;
+      return url;
     } catch (e) {
       console.log(e);
     }

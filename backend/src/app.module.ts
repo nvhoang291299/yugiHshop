@@ -11,6 +11,7 @@ import { FileModule } from './modules/file/file.module';
 import { AuthModule } from './modules/oauth2/auth.module';
 import { OrderModule } from './modules/order/order.module';
 import { UserModule } from './modules/user/user.module';
+import { SocketModule } from './modules/socket/socket.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UserModule } from './modules/user/user.module';
     AuthModule,
     FileModule,
     OrderModule,
+    SocketModule,
   ],
 })
 export class AppModule {}

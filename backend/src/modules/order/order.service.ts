@@ -11,6 +11,7 @@ import { CollectionService } from '../collection/collection.service';
 import { UserService } from '../user/user.service';
 import { ChangeStatus } from './model/changeStatus.model';
 import { CreateOrder } from './model/createOrder.model';
+import { SocketService } from '../socket/socket.service';
 
 @Injectable()
 export class OrderService extends BaseService<Order> {
@@ -23,6 +24,7 @@ export class OrderService extends BaseService<Order> {
     private readonly collectionService: CollectionService,
     private readonly userService: UserService,
     private readonly cardService: CardService,
+    private readonly socketService: SocketService,
     private readonly dataSource: DataSource,
   ) {
     super(orderRepository);
@@ -77,7 +79,7 @@ export class OrderService extends BaseService<Order> {
     // TODO: thay đổi trạng thái order pending -> completed or cancelled
     // TODO: bắn 1 message socket về cho user để thông báo
     // TODO: add card vào collection của user
-    const order = await this.findBy({ where: { id: changeStatus.id } });
+    const order = await this.findBy({ where: { id: changeStatus.orderId } });
     if (changeStatus.status == OrderStatus.CANCELLED) {
       await this.cancelOrder(order, userId);
     }
@@ -93,12 +95,13 @@ export class OrderService extends BaseService<Order> {
       newCardDTO.imageUrl = orderCard.card.imageUrl;
       newCardDTO.level = orderCard.card.level;
       newCardDTO.price = orderCard.card.price;
-      newCardDTO.quantity = orderCard.card.quantity;
+      newCardDTO.quantity = orderCard.quantity;
       newCardDTO.type = orderCard.card.type.name;
       return newCardDTO;
     }) as unknown as CardDTO;
     await this.collectionService.addToCollection(userId, cards);
-    return;
+    await this.socketService.emitMessage(order.user.email, 'Order success.');
+    return order;
   }
 
   async cancelOrder(order: Order, userId: number) {
@@ -123,6 +126,7 @@ export class OrderService extends BaseService<Order> {
 
       await manager.save(order);
     });
+    await this.socketService.emitMessage(order.user.email, 'Order cancelled.');
     return;
   }
 }

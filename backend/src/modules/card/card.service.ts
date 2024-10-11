@@ -1,11 +1,14 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Card } from 'src/database/entities/card.entity';
+import { PageDto } from 'src/database/models/page.dto';
 import { Repository } from 'typeorm';
 import { BaseService } from '../base/base.service';
 import { FileService } from '../file/file.service';
 import { TypeCardService } from '../type-card/typeCard.service';
+import { PageableDto } from './../../database/models/pageable.dto';
 import { AttributeCardService } from './../attribute-card/attributeCard.service';
+import { CardDTO } from './model/card.dto';
 import { CreateCardRequest } from './model/createCardRequest.model';
 
 @Injectable()
@@ -20,7 +23,28 @@ export class CardService extends BaseService<Card> {
     super(productRepository);
   }
 
-  async getListProduct() {}
+  async getListProduct(pageableDto: PageableDto): Promise<PageDto<CardDTO>> {
+    const [cards, count] = await this.findAllAndCount({
+      skip: pageableDto.skip,
+      take: pageableDto.take,
+    });
+    const itemCount = count;
+    const cardDTOs: CardDTO[] = cards.map((card) => {
+      const newCardDTO = new CardDTO();
+      newCardDTO.atk = card.atk;
+      newCardDTO.def = card.def;
+      newCardDTO.attribute = card.attribute.name;
+      newCardDTO.cardCode = card.cardCode;
+      newCardDTO.description = card.description;
+      newCardDTO.imageUrl = card.imageUrl;
+      newCardDTO.level = card.level;
+      newCardDTO.price = card.price;
+      newCardDTO.quantity = card.quantity;
+      newCardDTO.type = card.type.name;
+      return newCardDTO;
+    });
+    return new PageDto(cardDTOs, { itemCount, pageableDto });
+  }
 
   async getProduct(id: number) {
     try {
@@ -35,7 +59,7 @@ export class CardService extends BaseService<Card> {
   }
 
   async createCard(request: CreateCardRequest, imageUrl: Express.Multer.File) {
-    const file = this.fileService.uploadFile(imageUrl);
+    const file = await this.fileService.uploadFile(imageUrl);
     console.log('file', file);
 
     const attribute = await this.attributeCardService.getAttribute(request.attribute);
@@ -47,7 +71,7 @@ export class CardService extends BaseService<Card> {
     newCard.def = request.def;
     newCard.attribute = attribute;
     newCard.description = request.description;
-    newCard.imageUrl = request.imageUrl;
+    newCard.imageUrl = file as string;
     newCard.level = request.level;
     newCard.ownerBy = request.ownerBy;
     newCard.type = type;

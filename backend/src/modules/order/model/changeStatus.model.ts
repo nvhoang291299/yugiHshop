@@ -3,7 +3,7 @@ import { OrderStatus } from 'src/types/orderStatus.type';
 
 export class ChangeStatus {
   @IsNumber()
-  id: number;
+  orderId: number;
 
   @IsString()
   status: string = OrderStatus.COMPLETED;
