@@ -50,7 +50,6 @@ export class OrderService extends BaseService<Order> {
             throw new Error(`Card with id ${oc.cardId} not found`);
           }
           if (card.quantity < oc.quantity) {
-            // TODO: bắn message thông báo user là card đã hết hàng
             throw new Error(`Not enough stock for card with id ${oc.cardId}`);
           }
           card.quantity -= oc.quantity;
@@ -65,7 +64,6 @@ export class OrderService extends BaseService<Order> {
       );
       const newBalance = user.balance - createOrder.total;
       if (newBalance < 0) {
-        // TODO: bắn message thông báo user là không đủ tiền
         throw new Error('Insufficient balance');
       }
       user.balance = newBalance;
@@ -76,9 +74,6 @@ export class OrderService extends BaseService<Order> {
   }
 
   async confirm(changeStatus: ChangeStatus, userId: number) {
-    // TODO: thay đổi trạng thái order pending -> completed or cancelled
-    // TODO: bắn 1 message socket về cho user để thông báo
-    // TODO: add card vào collection của user
     const order = await this.findBy({ where: { id: changeStatus.orderId } });
     if (changeStatus.status == OrderStatus.CANCELLED) {
       await this.cancelOrder(order, userId);
@@ -98,7 +93,7 @@ export class OrderService extends BaseService<Order> {
       newCardDTO.quantity = orderCard.quantity;
       newCardDTO.type = orderCard.card.type.name;
       return newCardDTO;
-    }) as unknown as CardDTO;
+    }) as unknown as CardDTO[];
     await this.collectionService.addToCollection(userId, cards);
     await this.socketService.emitMessage(order.user.email, 'Order success.');
     return order;
@@ -109,7 +104,6 @@ export class OrderService extends BaseService<Order> {
     if (order.status !== OrderStatus.PENDING) {
       throw new BadRequestException("Only orders in 'PENDING' state can be canceled.");
     }
-    console.log(order);
 
     await this.dataSource.manager.transaction(async (manager) => {
       order.status = OrderStatus.CANCELLED;

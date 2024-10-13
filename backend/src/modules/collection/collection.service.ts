@@ -1,36 +1,49 @@
-import { PageableDto } from 'src/database/models/pageable.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CollectionCard } from 'src/database/schemas/collectionCard.schema';
 import { CardDTO } from '../card/model/card.dto';
-import { PageDto } from 'src/database/models/page.dto';
 
 @Injectable()
 export class CollectionService {
   constructor(@InjectModel('CollectionCard') private collectionModel: Model<CollectionCard>) {}
 
-  async addToCollection(userId: number, cards: CardDTO): Promise<CollectionCard> {
-    // TODO: kiem tra xe card da ton tai hay chua neu chua ton tai thi add vao acc neu da ton tai thi cong vao quantity
-    const collection = await this.collectionModel.find({ userId: userId });
-    if (!collection) {
-      const newCollection = new this.collectionModel({ userId: userId, cards: cards });
-      return newCollection.save();
+  async addToCollection(userId: number, cardDTOs: CardDTO[]): Promise<CollectionCard> {
+    const document = await this.collectionModel.findOne({ userId: userId });
+    if (!document) {
+      const cards = cardDTOs.map((card) => {
+        const f = {
+          card: card,
+          quantity: card.quantity,
+        };
+        return f;
+      });
+      const newDocument = new this.collectionModel({ userId: userId, cards: cards });
+      return newDocument.save();
     }
-    console.log(
-      collection.map((co) => {
-        co.cards;
-      }),
-    );
-    return;
+    const existedCards = document.cards;
+    const card = this.mergeCards(existedCards, cardDTOs);
+    return await this.collectionModel.findByIdAndUpdate(document._id, { cards: card });
   }
-  // TODO: list collection
-  async collectionsByUserId(userId: number, pageableDto: PageableDto) {
-    // const collections = await this.collectionModel
-    //   .find({ userId: userId.toString() })
-    //   .skip(pageableDto.skip)
-    //   .limit(pageableDto.take);
-    // return new PageDto(collections, { itemCount, pageableDto });
+
+  async collectionByUserId(userId: number) {
+    const document = await this.collectionModel.findOne({ userId: userId.toString() });
+    return document.cards;
   }
-  // TODO: detail card
+
+  mergeCards(existedCards, cardDTOs) {
+    cardDTOs.forEach((card) => {
+      const matchingCard = existedCards.find((item) => item.card.cardCode === card.cardCode);
+
+      if (matchingCard) {
+        matchingCard.quantity += card.quantity;
+      } else {
+        existedCards.push({
+          card: card,
+          quantity: card.quantity,
+        });
+      }
+    });
+    return existedCards;
+  }
 }

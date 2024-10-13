@@ -1,10 +1,12 @@
-import { BadRequestException, Body, Controller, Logger, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Logger, Post, Put, UseGuards } from '@nestjs/common';
 import { ChangeStatus } from './model/changeStatus.model';
 import { CreateOrder } from './model/createOrder.model';
 import { OrderService } from './order.service';
+import { AuthGuard } from 'src/guards/authGuards.guard';
+import { RoleGuard } from 'src/guards/roleGuards.guard';
 
 @Controller('order')
-// @UseGuards(AuthGuard, RoleGuard)
+@UseGuards(AuthGuard, RoleGuard)
 export class OrderController {
   private readonly logger = new Logger(OrderController.name);
   constructor(private readonly orderService: OrderService) {}

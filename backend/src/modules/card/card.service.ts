@@ -60,8 +60,6 @@ export class CardService extends BaseService<Card> {
 
   async createCard(request: CreateCardRequest, imageUrl: Express.Multer.File) {
     const file = await this.fileService.uploadFile(imageUrl);
-    console.log('file', file);
-
     const attribute = await this.attributeCardService.getAttribute(request.attribute);
     const type = await this.typeCardService.getType(request.type);
     const newCard = new Card();

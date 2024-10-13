@@ -1,8 +1,9 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name);
   private bucketName = process.env.AWS_BUCKET_NAME;
   private s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -28,10 +29,10 @@ export class FileService {
           ContentDisposition: 'inline',
         }),
       );
-      const url = `https://yugishop.s3.amazonaws.com/card/${name}`;
-      return url;
+      return `https://yugishop.s3.amazonaws.com/card/${name}`;
     } catch (e) {
-      console.log(e);
+      this.logger.error('Upload file failed.');
+      throw new BadRequestException(e);
     }
   }
 }

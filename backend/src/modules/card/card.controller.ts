@@ -30,7 +30,6 @@ export class CardController {
   @Get()
   async getList(@Query() pageableDto: PageableDto): Promise<PageDto<CardDTO>> {
     try {
-      console.log(pageableDto);
       const res = await this.cardService.getListProduct(pageableDto);
       return res;
     } catch (error) {
